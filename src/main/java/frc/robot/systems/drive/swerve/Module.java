@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.drive;
+package frc.robot.systems.drive.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -59,22 +59,20 @@ public class Module {
       turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
     }
 
-    // Run closed loop turn control
     if (angleSetpoint != null) {
       io.setPosition( angleSetpoint.getRadians() );
 
-      // Run closed loop drive control
       // Only allowed if closed loop turn control is running
       if (speedSetpoint != null) {
-        // Scale velocity based on turn error
-        //
         // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
         // towards the setpoint, its velocity should increase. This is achieved by
         // taking the component of the velocity in the direction of the setpoint.
-
-        // Run drive controller
-        // double velocityRadPerSec = adjustSpeedSetpoint / WHEEL_RADIUS;
-        io.setVelocity( speedSetpoint );
+        io.setVelocity( 
+          Math.cos(
+            Math.min( 90, Math.abs(
+              inputs.turnDesiredPosition.getRadians() - 
+              inputs.turnPosition.getRadians() ) ) )
+          *  speedSetpoint );
       }
     }
 
@@ -93,14 +91,14 @@ public class Module {
   }
 
   /** Runs the module with the specified setpoint state. Returns the optimized state. */
-  public SwerveModuleState runSetpoint(SwerveModuleState state) {
+  public SwerveModuleState setDesiredState(SwerveModuleState state) {
     // Optimize state based on current angle
     // Controllers run in "periodic" when the setpoint is not null
     var optimizedState = SwerveModuleState.optimize(state, getAngle());
 
     // Update setpoints, controllers run in "periodic"
-    angleSetpoint = optimizedState.angle;
     speedSetpoint = optimizedState.speedMetersPerSecond;
+    angleSetpoint = ( speedSetpoint/ DriveConstants.kMaxSpeed < 0.1 ) ?  optimizedState.angle : inputs.turnPosition;
 
     return optimizedState;
   }
@@ -133,11 +131,8 @@ public class Module {
 
   /** Returns the current turn angle of the module. */
   public Rotation2d getAngle() {
-    if (turnRelativeOffset == null) {
-      return new Rotation2d();
-    } else {
-      return inputs.turnPosition.plus(turnRelativeOffset);
-    }
+    if (turnRelativeOffset == null) return new Rotation2d();
+    return inputs.turnPosition.plus(turnRelativeOffset);
   }
 
   /** Returns the current drive position of the module in meters. */

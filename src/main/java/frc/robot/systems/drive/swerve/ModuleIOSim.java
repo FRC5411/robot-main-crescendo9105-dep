@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.drive;
+package frc.robot.systems.drive.swerve;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -51,16 +51,18 @@ public class ModuleIOSim implements ModuleIO {
     driveSim.update(LOOP_PERIOD_SECS);
     turnSim.update(LOOP_PERIOD_SECS);
 
-    inputs.drivePositionMeters = DriveConstants.wheelWidth * driveSim.getAngularPositionRad();
-    inputs.driveVelocityMetersPerSec = DriveConstants.wheelWidth * driveSim.getAngularVelocityRadPerSec();
+    inputs.drivePositionMeters = DriveConstants.kWheelWidth * driveSim.getAngularPositionRad();
+    inputs.driveVelocityMetersPerSec = DriveConstants.kWheelWidth * driveSim.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = driveAppliedVolts;
     inputs.driveCurrentAmps = new double[] {Math.abs(driveSim.getCurrentDrawAmps())};
+    inputs.driveDesiredMetersPerSec = driveController.getSetpoint();
 
     inputs.turnAbsolutePosition =
         new Rotation2d(turnSim.getAngularPositionRad()).plus(turnAbsoluteInitPosition);
     inputs.turnPosition = new Rotation2d(turnSim.getAngularPositionRad());
     inputs.turnVelocityRadPerSec = turnSim.getAngularVelocityRadPerSec();
     inputs.turnAppliedVolts = turnAppliedVolts;
+    inputs.turnDesiredPosition = Rotation2d.fromDegrees( turnController.getSetpoint() );
     inputs.turnCurrentAmps = new double[] {Math.abs(turnSim.getCurrentDrawAmps())};
 
     inputs.odometryDrivePositionsRad = new double[] {inputs.drivePositionMeters};

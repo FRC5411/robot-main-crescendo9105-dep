@@ -11,7 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.robot.subsystems.drive;
+package frc.robot.systems.drive.swerve;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -35,14 +35,9 @@ public class GyroIOPigeon2 implements GyroIO {
     yaw.setUpdateFrequency(Module.ODOMETRY_FREQUENCY);
     yawVelocity.setUpdateFrequency(100.0);
     pigeon.optimizeBusUtilization();
-    if (phoenixDrive) {
-      yawPositionQueue =
-          PhoenixOdometryThread.getInstance().registerSignal(pigeon, pigeon.getYaw());
-    } else {
-      yawPositionQueue =
-          SparkMaxOdometryThread.getInstance()
-              .registerSignal(() -> pigeon.getYaw().getValueAsDouble());
-    }
+    yawPositionQueue =
+      SparkMaxOdometryThread.getInstance()
+        .registerSignal( () -> pigeon.getYaw().getValueAsDouble() );
   }
 
   @Override
