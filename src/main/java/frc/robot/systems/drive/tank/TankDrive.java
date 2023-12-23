@@ -4,8 +4,6 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.robot.systems.drive.tank.TankDriveVars.Constants;
-import frc.robot.systems.drive.tank.TankDriveVars.Vars;
 
 public class TankDrive extends SubsystemBase {
     
@@ -17,28 +15,32 @@ public class TankDrive extends SubsystemBase {
         m_kDriveIO = driveIO;
     }
 
-    public FunctionalCommand setVelocity(TankDrive tankDrive, double targetMPS){
+    public FunctionalCommand setVelocity(TankDrive tankDrive, double leftTargetMPS, double rightTargetMPS){
         double kP = 0;
         double kI = 0;
         double kD = 0;
         double maxVelocity = 0;
         double maxAcceleration = 0;
 
-        ProfiledPIDController pid = new ProfiledPIDController(kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
-        pid.setTolerance(2);
+        ProfiledPIDController leftPID = new ProfiledPIDController(kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
+        ProfiledPIDController rightPID = new ProfiledPIDController(kP, kI, kD, new TrapezoidProfile.Constraints(maxVelocity, maxAcceleration));
+
+        leftPID.setTolerance(2);
+        rightPID.setTolerance(2);
         
         return new FunctionalCommand(
             // On Init
             () -> {
-                pid.reset(0);
+                leftPID.reset(m_kInputs.leftFrontVelocityMPS);
+                rightPID.reset(m_kInputs.rightFrontVelocityMPS);
                 System.out.println("Command SET VELOCITY has STARTED");
             }, 
             
             // On Execute
             () -> {
-                // LLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
-                double calc = pid.calculate(m_kInputs.leftFrontVelocityMPS, targetMPS);
-                m_kDriveIO.setVelocityMPS(calc);
+                double leftPIDCalc  = leftPID.calculate(m_kInputs.leftFrontVelocityMPS, leftTargetMPS);
+                double rightPIDCalc = rightPID.calculate(m_kInputs.rightFrontVelocityMPS, rightTargetMPS);
+                m_kDriveIO.setVolts(leftPIDCalc, rightPIDCalc);
             }, 
 
             // If Interrupted
@@ -47,7 +49,7 @@ public class TankDrive extends SubsystemBase {
             }, 
 
             // Is Finished
-            () -> false, 
+            () -> leftPID.atGoal() && rightPID.atGoal(), 
             
             // Requirements
             tankDrive

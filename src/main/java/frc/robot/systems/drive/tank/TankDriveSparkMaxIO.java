@@ -14,13 +14,14 @@ import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import edu.wpi.first.math.geometry.Pose2d;
+import frc.robot.systems.drive.tank.TankDriveVars.Constants;
 
 public class TankDriveSparkMaxIO implements TankDriveIO {
 
-    private final CANSparkMax m_kLeftFrontMotor = new CANSparkMax(1, MotorType.kBrushless);
-    private final CANSparkMax m_kLeftBackMotor = new CANSparkMax(2, MotorType.kBrushless);
-    private final CANSparkMax m_kRightFrontMotor = new CANSparkMax(3, MotorType.kBrushless);
-    private final CANSparkMax m_kRightBackMotor = new CANSparkMax(4, MotorType.kBrushless);
+    private final CANSparkMax m_kLeftFrontMotor = new CANSparkMax(Constants.leftFrontMotorID, MotorType.kBrushless);
+    private final CANSparkMax m_kLeftBackMotor = new CANSparkMax(Constants.leftBackMotorID, MotorType.kBrushless);
+    private final CANSparkMax m_kRightFrontMotor = new CANSparkMax(Constants.rightFrontMotorID, MotorType.kBrushless);
+    private final CANSparkMax m_kRightBackMotor = new CANSparkMax(Constants.rightBackMotorID, MotorType.kBrushless);
 
     private final RelativeEncoder m_kLeftFrontEncoder = m_kLeftFrontMotor.getEncoder();
     private final RelativeEncoder m_kLeftBackEncoder = m_kLeftBackMotor.getEncoder();
@@ -74,10 +75,11 @@ public class TankDriveSparkMaxIO implements TankDriveIO {
         inputs.rightFrontAppliedCurrentAMP = m_kRightFrontMotor.getOutputCurrent();
         inputs.rightBackAppliedCurrentAMP = m_kRightBackMotor.getOutputCurrent();
 
+        // TODO check if this is actually correct way to get values from pigeon2 lmao
         inputs.yawDEG = m_kGyro.getYaw().getValue();
         inputs.pitchDEG = m_kGyro.getPitch().getValueAsDouble();
 
-        m_kDriveOdometry.update(Rotation)
+        m_kDriveOdometry.update(Rotation2d.fromDegrees(inputs.yawDEG), inputs.leftFrontPositionM, inputs.rightFrontPositionM);
 
         inputs.estimatedPosition = m_kDriveOdometry.getEstimatedPosition();
     }

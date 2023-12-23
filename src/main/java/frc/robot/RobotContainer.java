@@ -1,3 +1,5 @@
+// In Java We Trust
+
 // Copyright 2021-2023 FRC 6328
 // http://github.com/Mechanical-Advantage
 //
