@@ -24,7 +24,6 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import java.util.Queue;
@@ -95,11 +94,15 @@ public class ModuleIOSparkMax implements ModuleIO {
 
     driveSparkMax.restoreFactoryDefaults();
     turnSparkMax.restoreFactoryDefaults();
-    turnAbsoluteEncoder.getConfigurator().apply( new CANcoderConfiguration() );
+    turnAbsoluteEncoder.getConfigurator().apply(new CANcoderConfiguration());
     CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
     canCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Unsigned_0To1;
-    canCoderConfig.MagnetSensor.SensorDirection = (!isTurnMotorInverted) ? SensorDirectionValue.Clockwise_Positive : SensorDirectionValue.CounterClockwise_Positive;
+    canCoderConfig.MagnetSensor.SensorDirection =
+        (!isTurnMotorInverted)
+            ? SensorDirectionValue.Clockwise_Positive
+            : SensorDirectionValue.CounterClockwise_Positive;
     canCoderConfig.MagnetSensor.MagnetOffset = absoluteEncoderOffset.getDegrees();
+    turnAbsoluteEncoder.getConfigurator().apply(canCoderConfig);
 
     driveSparkMax.setCANTimeout(250);
     turnSparkMax.setCANTimeout(250);
@@ -120,7 +123,6 @@ public class ModuleIOSparkMax implements ModuleIO {
     turnRelativeEncoder.setPosition(0.0);
     turnRelativeEncoder.setMeasurementPeriod(10);
     turnRelativeEncoder.setAverageDepth(2);
-    turnRelativeEncoder.setInverted(isTurnMotorInverted);
 
     driveSparkMax.setCANTimeout(0);
     turnSparkMax.setCANTimeout(0);
@@ -138,13 +140,13 @@ public class ModuleIOSparkMax implements ModuleIO {
     turnController = turnSparkMax.getPIDController();
 
     driveController.setP(1.0);
-    driveController.setD(0.0);
     driveController.setI(0.0);
+    driveController.setD(0.0);
     driveController.setFeedbackDevice(driveEncoder);
 
     turnController.setP(1.0);
-    turnController.setD(0.0);
     turnController.setI(0.0);
+    turnController.setD(0.0);
     turnController.setPositionPIDWrappingEnabled(true);
     turnController.setPositionPIDWrappingMinInput(0);
     turnController.setPositionPIDWrappingMaxInput(360);
@@ -157,19 +159,22 @@ public class ModuleIOSparkMax implements ModuleIO {
   @Override
   public void updateInputs(ModuleIOInputs inputs) {
     inputs.drivePositionMeters =
-        ( 2 * Math.PI * driveEncoder.getPosition() * DriveConstants.kWheelWidth ) / ( DRIVE_GEAR_RATIO );
+        (2 * Math.PI * driveEncoder.getPosition() * DriveConstants.kWheelWidth)
+            / (DRIVE_GEAR_RATIO);
     inputs.driveVelocityMetersPerSec =
-        ( 2 * Math.PI * driveEncoder.getVelocity() * DriveConstants.kWheelWidth ) / ( 60 * DRIVE_GEAR_RATIO );
+        (2 * Math.PI * driveEncoder.getVelocity() * DriveConstants.kWheelWidth)
+            / (60 * DRIVE_GEAR_RATIO);
     inputs.driveAppliedVolts = driveSparkMax.getAppliedOutput() * driveSparkMax.getBusVoltage();
     inputs.driveDesiredMetersPerSec = driveSetpointMetersPerSec;
     inputs.driveCurrentAmps = new double[] {driveSparkMax.getOutputCurrent()};
 
-    inputs.turnAbsolutePosition = Rotation2d.fromDegrees(
-        turnAbsoluteEncoder.getAbsolutePosition().asSupplier().get() );
+    inputs.turnAbsolutePosition =
+        Rotation2d.fromDegrees(turnAbsoluteEncoder.getAbsolutePosition().asSupplier().get());
     inputs.turnPosition =
-        Rotation2d.fromRotations( turnRelativeEncoder.getPosition() / TURN_GEAR_RATIO );
+        Rotation2d.fromRotations(turnRelativeEncoder.getPosition() / TURN_GEAR_RATIO);
     inputs.turnVelocityRadPerSec =
-        Units.rotationsPerMinuteToRadiansPerSecond( turnRelativeEncoder.getVelocity() ) / TURN_GEAR_RATIO;
+        Units.rotationsPerMinuteToRadiansPerSecond(turnRelativeEncoder.getVelocity())
+            / TURN_GEAR_RATIO;
     inputs.turnAppliedVolts = turnSparkMax.getAppliedOutput() * turnSparkMax.getBusVoltage();
     inputs.turnDesiredPosition = Rotation2d.fromDegrees(angleSetpointDegrees);
     inputs.turnCurrentAmps = new double[] {turnSparkMax.getOutputCurrent()};

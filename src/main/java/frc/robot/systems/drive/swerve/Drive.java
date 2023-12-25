@@ -106,7 +106,8 @@ public class Drive extends SubsystemBase {
     // Update odometry
     int deltaCount =
         gyroInputs.connected ? gyroInputs.odometryYawPositions.length : Integer.MAX_VALUE;
-    for (int i = 0; i < 4; i++) deltaCount = Math.min(deltaCount, modules[i].getPositionDeltas().length);
+    for (int i = 0; i < 4; i++)
+      deltaCount = Math.min(deltaCount, modules[i].getPositionDeltas().length);
 
     for (int deltaIndex = 0; deltaIndex < deltaCount; deltaIndex++) {
       // Read wheel deltas from each module
@@ -144,12 +145,9 @@ public class Drive extends SubsystemBase {
 
     // Send setpoints to modules
     SwerveModuleState[] optimizedSetpointStates = new SwerveModuleState[4];
-    for (int i = 0; i < 4; i++) {
-      // The module returns the optimized state, useful for logging
+    for (int i = 0; i < 4; i++)
       optimizedSetpointStates[i] = modules[i].setDesiredState(setpointStates[i]);
-    }
 
-    // Log setpoint states
     Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
     Logger.recordOutput("SwerveStates/SetpointsOptimized", optimizedSetpointStates);
   }
@@ -165,9 +163,7 @@ public class Drive extends SubsystemBase {
    */
   public void stopWithX() {
     Rotation2d[] headings = new Rotation2d[4];
-    for (int i = 0; i < 4; i++) {
-      headings[i] = getModuleTranslations()[i].getAngle();
-    }
+    for (int i = 0; i < 4; i++) headings[i] = getModuleTranslations()[i].getAngle();
     kinematics.resetHeadings(headings);
     stop();
   }

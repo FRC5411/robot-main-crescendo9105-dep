@@ -58,7 +58,7 @@ public class DriveCommands {
                   .getTranslation();
 
           // Convert to field relative speeds & send command
-          drive.runVelocity(
+          drive.setDesiredStates(
               ChassisSpeeds.fromFieldRelativeSpeeds(
                   linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
                   linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),

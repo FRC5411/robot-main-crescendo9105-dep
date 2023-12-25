@@ -52,28 +52,32 @@ public class Module {
 
   public void periodic() {
     Logger.processInputs("Drive/Module" + Integer.toString(index), inputs);
+    Logger.recordOutput(
+        "Drive/Module" + Integer.toString(index) + "/CurrentVel", inputs.driveVelocityMetersPerSec);
+    Logger.recordOutput(
+        "Drive/Module" + Integer.toString(index) + "/CurrentPos", inputs.turnPosition.getRadians());
 
     // On first cycle, reset relative turn encoder
     // Wait until absolute angle is nonzero in case it wasn't initialized yet
-    if (turnRelativeOffset == null && inputs.turnAbsolutePosition.getRadians() != 0.0) {
+    if (turnRelativeOffset == null && inputs.turnAbsolutePosition.getRadians() != 0.0)
       turnRelativeOffset = inputs.turnAbsolutePosition.minus(inputs.turnPosition);
-    }
 
     if (angleSetpoint != null) {
-      io.setPosition( angleSetpoint.getRadians() );
+      io.setPosition(angleSetpoint.getRadians());
 
       // Only allowed if closed loop turn control is running
-      if (speedSetpoint != null) {
+      if (speedSetpoint != null)
         // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
         // towards the setpoint, its velocity should increase. This is achieved by
         // taking the component of the velocity in the direction of the setpoint.
-        io.setVelocity( 
-          Math.cos(
-            Math.min( 90, Math.abs(
-              inputs.turnDesiredPosition.getRadians() - 
-              inputs.turnPosition.getRadians() ) ) )
-          *  speedSetpoint );
-      }
+        io.setVelocity(
+            Math.cos(
+                    Math.min(
+                        Math.PI / 2,
+                        Math.abs(
+                            inputs.turnDesiredPosition.getRadians()
+                                - inputs.turnPosition.getRadians())))
+                * speedSetpoint);
     }
 
     // Calculate position deltas for odometry
@@ -98,7 +102,10 @@ public class Module {
 
     // Update setpoints, controllers run in "periodic"
     speedSetpoint = optimizedState.speedMetersPerSecond;
-    angleSetpoint = ( speedSetpoint/ DriveConstants.kMaxSpeed < 0.1 ) ?  optimizedState.angle : inputs.turnPosition;
+    angleSetpoint =
+        Math.abs(speedSetpoint / DriveConstants.kMaxSpeed) < 0.1
+            ? optimizedState.angle
+            : inputs.turnPosition;
 
     return optimizedState;
   }

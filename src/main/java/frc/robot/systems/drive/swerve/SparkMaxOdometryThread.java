@@ -34,9 +34,7 @@ public class SparkMaxOdometryThread {
   private static SparkMaxOdometryThread instance = null;
 
   public static SparkMaxOdometryThread getInstance() {
-    if (instance == null) {
-      instance = new SparkMaxOdometryThread();
-    }
+    if (instance == null) instance = new SparkMaxOdometryThread();
     return instance;
   }
 
