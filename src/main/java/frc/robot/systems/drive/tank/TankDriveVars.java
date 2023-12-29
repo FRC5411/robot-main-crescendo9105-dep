@@ -6,5 +6,7 @@ public class TankDriveVars {
     public static final int leftBackMotorID = 2;
     public static final int rightFrontMotorID = 3;
     public static final int rightBackMotorID = 4;
+
+    public static final boolean squareInputs = false;
   }
 }

@@ -37,8 +37,7 @@ public class TankDriveSparkMaxIO implements TankDriveIO {
       new DifferentialDriveKinematics(21.0);
 
   private final SparkMaxPIDController m_kLeftFrontController = m_kLeftFrontMotor.getPIDController();
-  private final SparkMaxPIDController m_kRightFrontController =
-      m_kRightFrontMotor.getPIDController();
+  private final SparkMaxPIDController m_kRightFrontController = m_kRightFrontMotor.getPIDController();
 
   DifferentialDrive dDrive = new DifferentialDrive(m_kRightFrontMotor, m_kLeftFrontMotor);
 
@@ -83,7 +82,6 @@ public class TankDriveSparkMaxIO implements TankDriveIO {
     inputs.rightFrontAppliedCurrentAMP = m_kRightFrontMotor.getOutputCurrent();
     inputs.rightBackAppliedCurrentAMP = m_kRightBackMotor.getOutputCurrent();
 
-    // TODO check if this is actually correct way to get values from pigeon2 lmao
     inputs.yawDEG = m_kGyro.getYaw().getValue();
     inputs.pitchDEG = m_kGyro.getPitch().getValueAsDouble();
 
@@ -108,7 +106,7 @@ public class TankDriveSparkMaxIO implements TankDriveIO {
   }
 
   public void setArcadeDrive(double speed, double rotation) {
-    WheelSpeeds ws = DifferentialDrive.arcadeDriveIK(speed, rotation, false);
+    WheelSpeeds ws = DifferentialDrive.arcadeDriveIK(speed, rotation, Constants.squareInputs);
     m_kLeftFrontController.setReference(ws.left, ControlType.kVelocity);
     m_kRightFrontController.setReference(ws.right, ControlType.kVelocity);
   }
