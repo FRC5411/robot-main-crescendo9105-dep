@@ -16,11 +16,10 @@ package frc.robot.systems.drive.swerve;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 
 public class Module {
-  private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
+  // private static final double WHEEL_RADIUS = Units.inchesToMeters(2.0);
   public static final double ODOMETRY_FREQUENCY = 250.0;
 
   private final ModuleIO io;
@@ -70,14 +69,15 @@ public class Module {
         // When the error is 90°, the velocity setpoint should be 0. As the wheel turns
         // towards the setpoint, its velocity should increase. This is achieved by
         // taking the component of the velocity in the direction of the setpoint.
-        io.setVelocity(
-            Math.cos(
-                    Math.min(
-                        Math.PI / 2,
-                        Math.abs(
-                            inputs.turnDesiredPosition.getRadians()
-                                - inputs.turnPosition.getRadians())))
-                * speedSetpoint);
+        // io.setVelocity(
+        //     Math.cos(
+        //             Math.min(
+        //                 Math.PI / 2,
+        //                 Math.abs(
+        //                     inputs.turnDesiredPosition.getRadians()
+        //                         - inputs.turnPosition.getRadians())))
+        //         * speedSetpoint);
+        io.setVelocity(speedSetpoint);
     }
 
     // Calculate position deltas for odometry
@@ -85,7 +85,7 @@ public class Module {
         Math.min(inputs.odometryDrivePositionsRad.length, inputs.odometryTurnPositions.length);
     positionDeltas = new SwerveModulePosition[deltaCount];
     for (int i = 0; i < deltaCount; i++) {
-      double positionMeters = inputs.odometryDrivePositionsRad[i] * WHEEL_RADIUS;
+      double positionMeters = inputs.odometryDrivePositionsRad[i] * DriveConstants.kWheelRadius;
       Rotation2d angle =
           inputs.odometryTurnPositions[i].plus(
               turnRelativeOffset != null ? turnRelativeOffset : new Rotation2d());
@@ -102,10 +102,11 @@ public class Module {
 
     // Update setpoints, controllers run in "periodic"
     speedSetpoint = optimizedState.speedMetersPerSecond;
-    angleSetpoint =
-        Math.abs(speedSetpoint / DriveConstants.kMaxSpeed) < 0.1
-            ? optimizedState.angle
-            : inputs.turnPosition;
+    // angleSetpoint =
+    //     Math.abs(speedSetpoint / DriveConstants.kMaxSpeed) < 0.1
+    //         ? optimizedState.angle
+    //         : inputs.turnPosition;
+    angleSetpoint = optimizedState.angle;
 
     return optimizedState;
   }
@@ -149,7 +150,7 @@ public class Module {
 
   /** Returns the current drive velocity of the module in meters per second. */
   public double getVelocityMetersPerSec() {
-    return inputs.driveVelocityMetersPerSec * WHEEL_RADIUS;
+    return inputs.driveVelocityMetersPerSec;
   }
 
   /** Returns the module position (turn angle and drive position). */

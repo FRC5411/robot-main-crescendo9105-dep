@@ -51,9 +51,9 @@ public class ModuleIOSim implements ModuleIO {
     driveSim.update(LOOP_PERIOD_SECS);
     turnSim.update(LOOP_PERIOD_SECS);
 
-    inputs.drivePositionMeters = DriveConstants.kWheelWidth * driveSim.getAngularPositionRad();
+    inputs.drivePositionMeters = DriveConstants.kWheelRadius * driveSim.getAngularPositionRad();
     inputs.driveVelocityMetersPerSec =
-        DriveConstants.kWheelWidth * driveSim.getAngularVelocityRadPerSec();
+        DriveConstants.kWheelRadius * driveSim.getAngularVelocityRadPerSec();
     inputs.driveAppliedVolts = driveAppliedVolts;
     inputs.driveCurrentAmps = new double[] {Math.abs(driveSim.getCurrentDrawAmps())};
     inputs.driveDesiredMetersPerSec = driveController.getSetpoint();
@@ -86,14 +86,14 @@ public class ModuleIOSim implements ModuleIO {
   @Override
   public void setVelocity(double metersPerSecond) {
     setDriveVoltage(
-        driveController.calculate(driveSim.getAngularPositionRad(), metersPerSecond)
-            + driveFF.calculate(metersPerSecond));
+        driveController.calculate( driveSim.getAngularPositionRad(), metersPerSecond )
+            + driveFF.calculate( metersPerSecond ) );
   }
 
   @Override
   public void setPosition(double degrees) {
     setTurnVoltage(
         turnController.calculate(Math.toRadians(turnSim.getAngularPositionRad()), degrees)
-            + turnFF.calculate(turnController.getPositionError()));
+            + turnFF.calculate( Math.signum( turnController.getPositionError() ) ) );
   }
 }
